@@ -1,0 +1,5 @@
+scikit-image
+clean-fid
+lpips
+open-clip-torch
+opencv-python-headless
