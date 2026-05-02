@@ -37,7 +37,7 @@ MODEL_PATH="${COGVIDEOX_MODEL_PATH:-/export/home/liuyiming54/CogVideoX-2b}"
 MODE="CFGCache" 
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt_video.txt"
 BASE_OUTPUT_DIR="$PROJECT_ROOT/results/cogvideox"
-RHO_PROXY_TABLES_PATH="./calibration/cogvideox_rho_cfg6.npz"  # CFGCache 专用离线 rho 代理表
+PROXY_TABLES_PATH="./calibration/cogvideox_rho_cfg6.npz"  # CFGCache 专用离线 rho 代理表
 
 GPU_LIST="1,5,7"
 NUM_GPUS=""
@@ -257,7 +257,7 @@ fi
 SAMPLE_ARGS=(
     --model_name "$MODEL_NAME"
     --model_path "$MODEL_PATH"
-    --rho_proxy_tables_path "$RHO_PROXY_TABLES_PATH"
+    --proxy_tables_path "$PROXY_TABLES_PATH"
     --width "$WIDTH"
     --height "$HEIGHT"
     --num_frames "$NUM_FRAMES"

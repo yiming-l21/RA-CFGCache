@@ -33,10 +33,10 @@ BACKEND="wan"
 MODEL_NAME="wan"
 MODEL_PATH="${WAN_MODEL_PATH:-/export/home/liuyiming54/Wan2.1-T2V-1.3B-Diffusers}"
 
-MODE="HiCache"  #original, CFGCache, TeaCache, MagCache, DiCache, Taylor, Taylor-Scaled, HiCache, HiCache-Analytic, ToCa, Delta, collect, ClusCa, Hi-ClusCa, FasterCache, GroupedTaylor
+MODE="CFGCache"  #original, CFGCache, TeaCache, MagCache, DiCache, Taylor, Taylor-Scaled, HiCache, HiCache-Analytic, ToCa, Delta, collect, ClusCa, Hi-ClusCa, FasterCache, GroupedTaylor
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt_video.txt"
 BASE_OUTPUT_DIR="$PROJECT_ROOT/results/wan"
-RHO_PROXY_TABLES_PATH="./calibration/wan_rho_cfg5.npz"
+PROXY_TABLES_PATH="./calibration/wan_rho_cfg5.npz"
 
 GPU_LIST="1,2,4,6,7"
 NUM_GPUS=""
@@ -296,7 +296,6 @@ fi
 SAMPLE_ARGS=(
     --model_name "$MODEL_NAME"
     --model_path "$MODEL_PATH"
-    --rho_proxy_tables_path "$RHO_PROXY_TABLES_PATH"
     --width "$WIDTH"
     --height "$HEIGHT"
     --num_frames "$NUM_FRAMES"

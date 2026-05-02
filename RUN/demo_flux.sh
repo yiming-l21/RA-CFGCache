@@ -324,36 +324,28 @@ fi
 # -----------------------------
 # Python environment
 # -----------------------------
-PYTHON_EXEC="python"
 if [[ -n "$PYTHON_PATH" ]]; then
     PYTHON_EXEC="$PYTHON_PATH"
 else
-    if [[ ! -d ".venv" ]]; then
-        echo "[ERROR] .venv not found. Please create the project virtual environment first."
-        exit 1
-    fi
+    PYTHON_EXEC="python"
+fi
 
-    # shellcheck disable=SC1091
-    source .venv/bin/activate || {
-        echo "[ERROR] Failed to activate .venv"
-        exit 1
-    }
+if ! command -v "$PYTHON_EXEC" >/dev/null 2>&1; then
+    echo "[ERROR] Python executable not found: $PYTHON_EXEC"
+    echo "[ERROR] Please activate your conda environment first, e.g.:"
+    echo "        conda activate racfgcache"
+    echo "        or pass --python /path/to/python"
+    exit 1
+fi
 
-    if [[ -z "${VIRTUAL_ENV:-}" ]]; then
-        echo "[ERROR] Virtual environment is not active after sourcing .venv/bin/activate"
-        exit 1
-    fi
+PYTHON_REALPATH="$("$PYTHON_EXEC" -c 'import sys; print(sys.executable)')"
+PYTHON_VERSION="$("$PYTHON_EXEC" -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')"
 
-    EXPECTED_VENV="$PROJECT_ROOT/.venv"
-    if [[ "$VIRTUAL_ENV" != "$EXPECTED_VENV" ]]; then
-        echo "[ERROR] Activated venv path mismatch"
-        echo "        current:  $VIRTUAL_ENV"
-        echo "        expected: $EXPECTED_VENV"
-        echo "        suggestion: cd $PROJECT_ROOT && python3.10 -m venv .venv"
-        exit 1
-    fi
+echo "[INFO] Using python: $PYTHON_REALPATH"
+echo "[INFO] Python version: $PYTHON_VERSION"
 
-    echo "[INFO] Using virtual environment: $VIRTUAL_ENV"
+if [[ -n "${CONDA_DEFAULT_ENV:-}" ]]; then
+    echo "[INFO] Conda environment: $CONDA_DEFAULT_ENV"
 fi
 
 auto_detect_model_dir() {
