@@ -33,7 +33,7 @@ mkdir -p "$TMPDIR" "$HF_HOME" "$HUGGINGFACE_HUB_CACHE" "$TRANSFORMERS_CACHE" "$P
 # Defaults
 # -----------------------------
 MODEL_PATH="${MODEL_PATH:-}"
-DEFAULT_COGVIDEOX_MODEL_PATH="/export/home/liuyiming54/CogVideoX-2b"
+DEFAULT_COGVIDEOX_MODEL_PATH="/path/CogVideoX-2b"
 
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt_video.txt"
 BASE_OUTPUT_DIR="$PROJECT_ROOT/results/cogvideox"

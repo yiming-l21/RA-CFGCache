@@ -34,7 +34,7 @@ mkdir -p "$TMPDIR" "$HF_HOME" "$HUGGINGFACE_HUB_CACHE" "$TRANSFORMERS_CACHE" "$P
 # Defaults
 # -----------------------------
 MODEL_PATH="${MODEL_PATH:-}"
-DEFAULT_WAN_MODEL_PATH="/export/home/liuyiming54/Wan2.1-T2V-1.3B-Diffusers"
+DEFAULT_WAN_MODEL_PATH="/path/Wan2.1-T2V-1.3B-Diffusers"
 
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt_video.txt"
 BASE_OUTPUT_DIR="$PROJECT_ROOT/results/wan"

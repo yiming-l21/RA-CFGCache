@@ -59,7 +59,7 @@ Adjacent-step rho curve means:
 
 Optional comparison with another rho npz:
 
-    --compare_npz /export/home/liuyiming54/CFGCache/calibration/flux_rho_all_cfg.npz
+    --compare_npz /path/CFGCache/calibration/flux_rho_all_cfg.npz
 
 Example:
 
@@ -73,7 +73,7 @@ Example:
         --root calibration_rho \
         --models flux \
         --cfg_scales auto \
-        --compare_npz /export/home/liuyiming54/CFGCache/calibration/flux_rho_all_cfg.npz
+        --compare_npz /path/CFGCache/calibration/flux_rho_all_cfg.npz
 """
 
 from __future__ import annotations

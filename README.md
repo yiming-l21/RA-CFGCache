@@ -42,8 +42,7 @@ In our paper, RA-CFGCache is evaluated on **FLUX.1-dev**, **Qwen-Image**, and **
 ---
 ## Motivation
 <p align="center">
-  <img src="docs/figures/branch_vs_guided_error.png" alt="Branch-wise errors vs guided error" width="48%">
-  <img src="docs/figures/local_vs_final_error.png" alt="Local guided error vs final deviation" width="48%">
+  <img src="docs/figures/mismatches.png" alt="Two Mismatches" width="98%">
 </p>
 Classifier-free guidance (CFG) improves conditional generation quality, but it also changes what a caching rule should care about. Existing training-free caching methods are often defined on single-prediction or branch-wise changes. Under CFG, however, the sampler is driven by the guided prediction rather than either branch alone, so small branch-wise errors do not necessarily imply a small perturbation on the actual guided update. In addition, diffusion is iterative: even when the local guided error is similar, its effect on the final sample can vary significantly depending on when the perturbation is introduced.
 
@@ -376,13 +375,13 @@ We evaluate RA-CFGCache on both text-to-image and text-to-video generation. All 
 ### Trade-off Curve
 
 <p align="center">
-  <img src="docs/assets/flux_tradeoff.png" alt="FLUX trade-off curve" width="85%">
+  <img src="docs/figures/tradeoff.png" alt="FLUX trade-off curve" width="85%">
 </p>
 
 ### Qualitative Examples
 
 <p align="center">
-  <img src="docs/assets/qualitative_main.png" alt="Qualitative examples" width="95%">
+  <img src="docs/figures/qualitative_main.png" alt="Qualitative examples" width="95%">
 </p>
 
 
@@ -396,19 +395,6 @@ RA-CFGCache is effective in practice, but several limitations remain:
 - The scheduler is an online threshold-based controller rather than a globally optimal sequential policy.
 - The framework is most naturally compatible with proxy families that have explicit cumulative reuse semantics.
 
----
-## Citation
-
-If you find this repository useful, please consider citing our work:
-
-```bibtex
-@article{ra_cfgcache_2026,
-  title={RA-CFGCache: From Branch-Level Heuristics to Guided-Risk Control under Classifier-Free Guidance},
-  author={Anonymous Authors},
-  journal={arXiv preprint arXiv:xxxx.xxxxx},
-  year={2026}
-}
-```
 
 ---
 
@@ -417,10 +403,3 @@ If you find this repository useful, please consider citing our work:
 This repository is initialized from [HiCache](https://github.com/fenglang918/HiCache). We sincerely thank the HiCache authors for releasing their codebase, which provides an important foundation for this project.
 
 We also thank the authors of prior training-free diffusion acceleration and caching methods, including TeaCache, MagCache, DiCache, FasterCache, and TaylorSeer, for their inspiring works and open-source contributions.
-
-## Contact
-
-For questions, bug reports, or collaboration, please open an issue or contact:
-
-- Yiming Liu: `liuyiming5117@163.com`
-
