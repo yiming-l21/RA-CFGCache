@@ -31,7 +31,7 @@ mkdir -p "$TMPDIR" "$HF_HOME" "$HUGGINGFACE_HUB_CACHE" "$TRANSFORMERS_CACHE" "$P
 # -----------------------------------------------------------------------------
 BACKEND="wan"
 MODEL_NAME="wan"
-MODEL_PATH="${WAN_MODEL_PATH:-/export/home/liuyiming54/Wan2.1-T2V-1.3B-Diffusers}"
+MODEL_PATH="${WAN_MODEL_PATH:-/path/Wan2.1-T2V-1.3B-Diffusers}"
 
 MODE="CFGCache"  #original, CFGCache, TeaCache, MagCache, DiCache, Taylor, Taylor-Scaled, HiCache, HiCache-Analytic, ToCa, Delta, collect, ClusCa, Hi-ClusCa, FasterCache, GroupedTaylor
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt_video.txt"
@@ -95,7 +95,7 @@ backend 已固定为 wan，不再暴露 Flux / Qwen / CogVideoX / Chipmunk 等�
   -p, --prompt_file FILE             Prompt 文件 [默认: resources/prompts/prompt_video.txt]
   -d, --output_dir DIR               基础输出目录 [默认: results/wan]
       --model_path PATH              Wan2.1 模型路径
-                                    [默认: /export/home/liuyiming54/Wan2.1-T2V-1.3B-Diffusers]
+                                    [默认: /path/Wan2.1-T2V-1.3B-Diffusers]
       --model_name NAME              模型名称 [默认: wan]
 
   -w, --width WIDTH                  视频宽度 [默认: 832]
@@ -139,7 +139,7 @@ backend 已固定为 wan，不再暴露 Flux / Qwen / CogVideoX / Chipmunk 等�
     --mode CFGCache \\
     --gpus 1,5,7 \\
     --limit 30 \\
-    --model_path /export/home/liuyiming54/Wan2.1-T2V-1.3B-Diffusers
+    --model_path /path/Wan2.1-T2V-1.3B-Diffusers
 
   bash RUN/demo_wan.sh \\
     --mode original \\

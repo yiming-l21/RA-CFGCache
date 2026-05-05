@@ -55,7 +55,7 @@ FORCE=false
 PYTHON_PATH=""
 MODEL_DIR="${MODEL_DIR:-}"
 WEIGHTS_DIR="$PROJECT_ROOT/resources/weights"
-LEGACY_MODEL_DIR_DEFAULT="/export/home/liuyiming54/flux-dev"
+LEGACY_MODEL_DIR_DEFAULT="/path/flux-dev"
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt.txt"
 BASE_OUTPUT_DIR=""
 

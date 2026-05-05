@@ -32,7 +32,7 @@ mkdir -p "$TMPDIR" "$HF_HOME" "$HUGGINGFACE_HUB_CACHE" "$TRANSFORMERS_CACHE" "$P
 # -----------------------------------------------------------------------------
 BACKEND="cogvideox"
 MODEL_NAME="cogvideox"
-MODEL_PATH="${COGVIDEOX_MODEL_PATH:-/export/home/liuyiming54/CogVideoX-2b}"
+MODEL_PATH="${COGVIDEOX_MODEL_PATH:-/path/CogVideoX-2b}"
 
 MODE="CFGCache" 
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt_video.txt"
@@ -87,7 +87,7 @@ backend 已固定为 cogvideox，不再暴露 Flux / Qwen / Chipmunk 等无关�
 
   -p, --prompt_file FILE             Prompt 文件 [默认: resources/prompts/prompt_video.txt]
   -d, --output_dir DIR               基础输出目录 [默认: results/cogvideox]
-      --model_path PATH              CogVideoX 模型路径 [默认: /export/home/liuyiming54/CogVideoX-2b]
+      --model_path PATH              CogVideoX 模型路径 [默认: /path/CogVideoX-2b]
 
   -w, --width WIDTH                  视频宽度 [默认: 720]
   -h, --height HEIGHT                视频高度 [默认: 480]
@@ -187,7 +187,7 @@ fi
 
 if [[ -z "$MODEL_PATH" || ! -d "$MODEL_PATH" ]]; then
     echo "[ERROR] CogVideoX 模型目录不存在: $MODEL_PATH"
-    echo "[ERROR] 请使用 --model_path /export/home/liuyiming54/CogVideoX-2b 指定"
+    echo "[ERROR] 请使用 --model_path /path/CogVideoX-2b 指定"
     exit 1
 fi
 

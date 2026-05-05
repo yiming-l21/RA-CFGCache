@@ -5,9 +5,9 @@ export TRANSFORMERS_OFFLINE=1
 export HF_DATASETS_OFFLINE=1
 export HF_HUB_OFFLINE=1
 
-REF_DIR="${REF_DIR:-/export/home/liuyiming54/RA-CFGCache/results/wan/wan_original_50}"
-CMP_DIR="${CMP_DIR:-/export/home/liuyiming54/RA-CFGCache/results/wan/wan_hicache}"
-PROMPT_FILE="${PROMPT_FILE:-/export/home/liuyiming54/RA-CFGCache/resources/prompts/prompt_video.txt}"
+REF_DIR="${REF_DIR:-/path/RA-CFGCache/results/wan/wan_original_50}"
+CMP_DIR="${CMP_DIR:-/path/RA-CFGCache/results/wan/wan_hicache}"
+PROMPT_FILE="${PROMPT_FILE:-/path/RA-CFGCache/resources/prompts/prompt_video.txt}"
 
 OUT_JSON="${OUT_JSON:-video_metrics.json}"
 OUT_CSV="${OUT_CSV:-video_metrics.csv}"

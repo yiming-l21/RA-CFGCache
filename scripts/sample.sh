@@ -558,7 +558,7 @@ resolve_wan_model_path() {
     elif [[ -d "$WEIGHTS_DIR/Wan2.1" ]]; then
         echo "$WEIGHTS_DIR/Wan2.1"
     else
-        echo "/export/home/liuyiming54/Wan2.1-T2V-1.3B-Diffusers"
+        echo "/path/Wan2.1-T2V-1.3B-Diffusers"
     fi
 }
 

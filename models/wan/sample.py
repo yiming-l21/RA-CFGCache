@@ -998,7 +998,7 @@ def app():
     parser.add_argument(
         "--proxy_tables_path",
         type=str,
-        default="/export/home/liuyiming54/RA-CFGCache/calibration/wan_rho_cfg5.npz",
+        default="/path/RA-CFGCache/calibration/wan_rho_cfg5.npz",
         help="Path to packed all-cfg offline rho npz for CFGCache.",
     )
 
