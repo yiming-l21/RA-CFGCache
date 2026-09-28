@@ -4,7 +4,10 @@ import math
 import json
 from pathlib import Path
 import cv2
-os.environ["CLEANFID_CACHE_DIR"] = "/path/inception_model"
+os.environ.setdefault(
+    "CLEANFID_CACHE_DIR",
+    str(Path(__file__).resolve().parents[1] / ".cache" / "cleanfid"),
+)
 # ---- SSIM ----
 from skimage.metrics import structural_similarity as ssim
 

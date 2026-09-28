@@ -373,7 +373,7 @@ class DimensionGroupedTaylorSeer:
             traceback.print_exc()
 
     def update_and_cluster(self, feature: torch.Tensor, save_visualization: bool = False, 
-                          save_path: str = "/root/autodl-tmp/TaylorSeer/PCA-FLUX_copy/AnalyseResults", 
+                          save_path: str = "results/grouped_taylor_analysis",
                           image_idx: int = 0) -> bool:
         """
         更新特征历史并尝试进行聚类

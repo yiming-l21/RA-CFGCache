@@ -1,9 +1,9 @@
 [project]
-name = "flux"
+name = "ra-cfgcache"
 authors = [
-  { name = "Black Forest Labs", email = "support@blackforestlabs.ai" },
+  { name = "RA-CFGCache Authors" },
 ]
-description = "Inference codebase for FLUX"
+description = "Risk-aligned caching for classifier-free guidance in diffusion models"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
@@ -35,12 +35,12 @@ gradio = [
   "gradio",
 ]
 all = [
-  "flux[streamlit]",
-  "flux[gradio]",
+  "ra-cfgcache[streamlit]",
+  "ra-cfgcache[gradio]",
 ]
 
-[project.scripts]
-flux = "flux.cli:app"
+[project.urls]
+Repository = "https://github.com/yiming-l21/RA-CFGCache"
 
 [build-system]
 build-backend = "setuptools.build_meta"
@@ -96,6 +96,6 @@ where = ["models/flux/src"]
 
 [tool.setuptools_scm]
 write_to = "models/flux/src/flux/_version.py"
-parentdir_prefix_version = "flux-"
+parentdir_prefix_version = "ra-cfgcache-"
 fallback_version = "0.0.0"
 version_scheme = "post-release"

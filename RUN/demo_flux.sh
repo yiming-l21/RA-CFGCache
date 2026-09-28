@@ -45,8 +45,8 @@ NEGATIVE_PROMPT="animation"
 NEGATIVE_PROMPT_FILE=""
 HICACHE_SCALE_FACTOR="0.5"
 REL_L1_THRESH="0.4"
-GPU_LIST="4,5,6,7"
-NUM_GPUS="4"
+GPU_LIST="${RA_CFGCACHE_GPUS:-0}"
+NUM_GPUS=""
 RUN_NAME=""
 AUTO_RUN_NAME=false
 KEEP_TEMP=false
@@ -55,7 +55,6 @@ FORCE=false
 PYTHON_PATH=""
 MODEL_DIR="${MODEL_DIR:-}"
 WEIGHTS_DIR="$PROJECT_ROOT/resources/weights"
-LEGACY_MODEL_DIR_DEFAULT="/path/flux-dev"
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt.txt"
 BASE_OUTPUT_DIR=""
 
@@ -90,12 +89,12 @@ Options:
                                   HiCache-Analytic, original, ToCa,
                                   Delta, ClusCa, Hi-ClusCa,
                                   FasterCache
-                                  [default: DiCache]
+                                  [default: CFGCache]
 
       --model_name NAME           FLUX model name: flux-dev | flux-schnell
                                   [default: flux-dev]
-  -i, --interval N                Sampling interval [default: 7]
-  -o, --max_order N               Maximum Taylor order [default: 2]
+  -i, --interval N                Sampling interval [default: 3]
+  -o, --max_order N               Maximum Taylor order [default: 1]
       --first_enhance N           Force full computation for the first N steps
                                   [default: 3]
   -p, --prompt_file FILE          Prompt file
@@ -109,17 +108,17 @@ Options:
   -l, --limit LIMIT               Maximum number of prompts/images
                                   [default: 200]
 
-      --true_cfg_scale VALUE      True CFG scale [default: 1.5]
+      --true_cfg_scale VALUE      True CFG scale [default: 3.5]
       --negative_prompt TEXT      Global negative prompt
                                   [default: animation]
       --negative_prompt_file FILE Per-line negative prompt file aligned with prompt file
       --hicache_scale VALUE       HiCache scaling factor [default: 0.5]
-      --rel_l1_thresh VALUE       TeaCache relative L1 threshold [default: 1.0]
+      --rel_l1_thresh VALUE       TeaCache relative L1 threshold [default: 0.4]
 
       --model_dir DIR             Local FLUX weights directory
                                   (compatible with legacy scripts / env vars)
       --python PATH               Python executable to run RUN/multi_gpu_launcher.py
-      --gpus IDS                  GPU list, e.g. 0,1,3
+      --gpus IDS                  GPU list, e.g. 0,1,3 [default: 0]
       --num_gpus N                If --gpus is not set, use GPUs [0, N-1]
       --run-name NAME             Custom run name
 
@@ -352,17 +351,12 @@ auto_detect_model_dir() {
     local model_name="$1"
     local candidates=()
 
-    # Highest priority: legacy env vars commonly used by the old script.
+    # Highest priority: user-provided environment variables.
     if [[ -n "${FLUX_MODEL_DIR:-}" ]]; then
         candidates+=("$FLUX_MODEL_DIR")
     fi
     if [[ -n "${MODEL_DIR:-}" ]]; then
         candidates+=("$MODEL_DIR")
-    fi
-
-    # Legacy machine-specific default used by the old internal script.
-    if [[ "$model_name" == "flux-dev" ]]; then
-        candidates+=("$LEGACY_MODEL_DIR_DEFAULT")
     fi
 
     # Open-source style repository-relative locations.
@@ -422,7 +416,7 @@ else
     AUTO_MODEL_DIR="$(auto_detect_model_dir "$MODEL_NAME" || true)"
     if [[ -z "$AUTO_MODEL_DIR" ]]; then
         echo "[ERROR] Could not find a local weights directory for $MODEL_NAME"
-        echo "[ERROR] Checked legacy env vars FLUX_MODEL_DIR / MODEL_DIR, legacy default: $LEGACY_MODEL_DIR_DEFAULT, and repo weights under $WEIGHTS_DIR"
+        echo "[ERROR] Checked FLUX_MODEL_DIR / MODEL_DIR and repository-relative weights under $WEIGHTS_DIR"
         echo "[ERROR] Please pass --model_dir explicitly if your weights live elsewhere"
         exit 1
     fi

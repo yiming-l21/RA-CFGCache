@@ -140,7 +140,7 @@ show_help() {
     echo "  -m, --mode MODE           缓存模式 (CFGCache, TeaCache, MagCache, DiCache, Taylor, Taylor-Scaled, HiCache, HiCache-Analytic, original, ToCa, Delta, collect, ClusCa, Hi-ClusCa, FasterCache) [默认: Taylor]"
     echo "  --model_name NAME         模型名称 (flux-dev|flux-schnell|wan|cogvideox) [默认: flux-dev]"
     echo "  --model_dir DIR           指定本地模型目录"
-    echo "  --model_path PATH         指定本地模型路径/目录（Qwen/CogVideoX 优先使用）"
+    echo "  --model_path PATH         指定 Wan/CogVideoX 本地模型路径/目录"
     echo "  --rho_proxy_tables_path PATH  CFGCache专用：离线rho代理表路径（.npz文件）"
     echo "  --true_cfg_scale VAL      True CFG scale (>1 启用 true CFG) [默认: 1.0]"
     echo "  --negative_prompt TEXT    全局负向 prompt（对所有 prompt 生效）"
@@ -557,9 +557,8 @@ resolve_wan_model_path() {
         echo "$WEIGHTS_DIR/Wan-AI/Wan2.1-T2V-1.3B-Diffusers"
     elif [[ -d "$WEIGHTS_DIR/Wan2.1" ]]; then
         echo "$WEIGHTS_DIR/Wan2.1"
-    else
-        echo "/path/Wan2.1-T2V-1.3B-Diffusers"
     fi
+    return 0
 }
 
 resolve_cogvideox_model_path() {
@@ -573,9 +572,8 @@ resolve_cogvideox_model_path() {
         echo "$WEIGHTS_DIR/CogVideoX-2b"
     elif [[ -d "$WEIGHTS_DIR/CogVideoX" ]]; then
         echo "$WEIGHTS_DIR/CogVideoX"
-    else
-        echo "CogVideoX-2b"
     fi
+    return 0
 }
 
 # 统一的输出目录：仅保留一级目录为 mode，其余关键参数合并为子目录名
@@ -741,6 +739,11 @@ case "$BACKEND" in
         [[ "$MODEL_NAME" == "flux-dev" || -z "$MODEL_NAME" ]] && MODEL_NAME="wan"
 
         WAN_MODEL_PATH="$(resolve_wan_model_path)"
+        if [[ -z "$WAN_MODEL_PATH" || ! -d "$WAN_MODEL_PATH" ]]; then
+            echo "[ERROR] 请通过 --model_path 或 WAN_MODEL_PATH 指定 Wan 的本地 Diffusers 模型目录"
+            rm -f "$TEMP_PROMPT_FILE"
+            exit 1
+        fi
         export WAN_MODEL_PATH="$WAN_MODEL_PATH"
 
         WAN_MODULE="$(first_existing_module models.wan.src.sample models.wan.sample || true)"
@@ -792,6 +795,11 @@ case "$BACKEND" in
     cogvideox)
         [[ "$MODEL_NAME" == "flux-dev" || -z "$MODEL_NAME" ]] && MODEL_NAME="cogvideox"
         COGVIDEOX_MODEL_PATH="$(resolve_cogvideox_model_path)"
+        if [[ -z "$COGVIDEOX_MODEL_PATH" || ! -d "$COGVIDEOX_MODEL_PATH" ]]; then
+            echo "[ERROR] 请通过 --model_path 或 COGVIDEOX_MODEL_PATH 指定 CogVideoX 的本地 Diffusers 模型目录"
+            rm -f "$TEMP_PROMPT_FILE"
+            exit 1
+        fi
         COGVIDEOX_MODULE="$(first_existing_module models.cogvideox.src.sample models.cogvideox.sample models.cogvideo_x.src.sample models.cogvideo_x.sample || true)"
         if [[ -z "$COGVIDEOX_MODULE" ]]; then
             echo "[ERROR] 未找到 CogVideoX Python module: models.cogvideox.src.sample / models.cogvideox.sample / models.cogvideo_x.src.sample / models.cogvideo_x.sample"

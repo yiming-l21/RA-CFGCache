@@ -10,13 +10,13 @@
     <img src="https://img.shields.io/badge/Paper-arXiv-b31b1b.svg" alt="Paper">
   </a>
   <a href="#license">
-    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License">
+    <img src="https://img.shields.io/badge/License-GPL--3.0-blue.svg" alt="License">
   </a>
-  <a href="#installation">
+  <a href="#quick-start">
     <img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python">
   </a>
-  <a href="#installation">
-    <img src="https://img.shields.io/badge/PyTorch-2.1+-ee4c2c.svg" alt="PyTorch">
+  <a href="#quick-start">
+    <img src="https://img.shields.io/badge/PyTorch-2.6+-ee4c2c.svg" alt="PyTorch">
   </a>
 </p>
 
@@ -37,7 +37,7 @@ RA-CFGCache addresses these two issues with:
 - **Propagation-Aware Rescaling**: rescales the local guided risk using timestep-dependent propagation gain to better reflect final deviation.
 - **Threshold-based Scheduling**: triggers refresh when the accumulated risk exceeds a threshold.
 
-In our paper, RA-CFGCache is evaluated on **FLUX.1-dev**, **Qwen-Image**, and **CogVideoX-2B**, and achieves a stronger efficiency–fidelity trade-off than existing training-free caching baselines.
+In our paper, RA-CFGCache is evaluated on **FLUX.1-dev**, **Wan2.1-T2V-1.3B**, and **CogVideoX-2B**, and achieves a stronger efficiency–fidelity trade-off than existing training-free caching baselines.
 
 ---
 ## Motivation
@@ -80,24 +80,44 @@ cd /path/to/RA-CFGCache
 bash scripts/create_env.sh
 ```
 
-### 2. Run a minimal example
+### 2. Model Weights
+
+Model weights are not included in this repository. Download them from their official model pages and review the applicable license before use:
+
+| Model | Official weights | Weight license | Configure with |
+|---|---|---|---|
+| FLUX.1-dev | [black-forest-labs/FLUX.1-dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) | FLUX.1-dev Non-Commercial License | `FLUX_MODEL_DIR` or `--model_dir` |
+| Wan2.1-T2V-1.3B | [Wan-AI/Wan2.1-T2V-1.3B-Diffusers](https://huggingface.co/Wan-AI/Wan2.1-T2V-1.3B-Diffusers) | Apache-2.0 | `WAN_MODEL_PATH` or `--model_path` |
+| CogVideoX-2B | [THUDM/CogVideoX-2b](https://huggingface.co/THUDM/CogVideoX-2b) | Apache-2.0 | `COGVIDEOX_MODEL_PATH` or `--model_path` |
+
+For example:
+
+```bash
+export FLUX_MODEL_DIR=/path/to/FLUX.1-dev
+export WAN_MODEL_PATH=/path/to/Wan2.1-T2V-1.3B-Diffusers
+export COGVIDEOX_MODEL_PATH=/path/to/CogVideoX-2b
+```
+
+The FLUX directory must use the layout expected by the reference FLUX implementation, including `flux1-dev.safetensors`, `ae.safetensors`, and the text-encoder/tokenizer subdirectories. The Wan and CogVideoX paths should point to local Diffusers-format model directories. The launchers fail with an explicit message when a required path is missing; they do not silently use a machine-specific default.
+
+### 3. Run a minimal example
 
 #### FLUX.1-dev
 
 ```bash
-bash scripts/demo_flux.sh
+bash RUN/demo_flux.sh --gpus 0 --limit 1
 ```
 
 #### Wan2.1-1.3B
 
 ```bash
-bash scripts/demo_wan.sh
+bash RUN/demo_wan.sh --gpus 0 --limit 1
 ```
 
 #### CogVideoX-2B
 
 ```bash
-bash scripts/demo_cogvideox.sh
+bash RUN/demo_cogvideox.sh --gpus 0 --limit 1
 ```
 
 ---
@@ -106,9 +126,9 @@ bash scripts/demo_cogvideox.sh
 
 | Model | Task | Status | Example Script | Notes |
 |---|---|---:|---|---|
-| FLUX.1-dev | Text-to-Image | ✅ | `scripts/demo_flux.sh` | Main T2I backend |
-| Wan2.1-1.3B | Text-to-Video | ✅ | `scripts/demo_wan.sh` | Main T2V backend |
-| CogVideoX-2B | Text-to-Video | ✅ | `scripts/demo_cogvideox.sh` | Main T2V backend |
+| FLUX.1-dev | Text-to-Image | ✅ | `RUN/demo_flux.sh` | Main T2I backend |
+| Wan2.1-1.3B | Text-to-Video | ✅ | `RUN/demo_wan.sh` | Main T2V backend |
+| CogVideoX-2B | Text-to-Video | ✅ | `RUN/demo_cogvideox.sh` | Main T2V backend |
 
 ---
 ## Reproduce Main Results
@@ -393,7 +413,7 @@ RA-CFGCache is effective in practice, but several limitations remain:
 
 - The propagation gain is a first-order approximation of downstream error propagation.
 - The scheduler is an online threshold-based controller rather than a globally optimal sequential policy.
-- The framework is most naturally compatible with proxy families that have explicit cumulative reuse semantics.
+- Offline calibration is configuration-specific; transferring to a different model, scheduler, resolution, step count, CFG scale, or prompt distribution may require validation or recalibration.
 
 
 ---
@@ -404,3 +424,12 @@ This repository is initialized from [HiCache](https://github.com/fenglang918/HiC
 
 We also thank the authors of prior training-free diffusion acceleration and caching methods, including TeaCache, MagCache, DiCache, FasterCache, and TaylorSeer, for their inspiring works and open-source contributions.
 
+## Citation
+
+The arXiv link and BibTeX entry will be added here when the preprint is available.
+
+## License
+
+RA-CFGCache is released under the [GNU General Public License v3.0](LICENSE).
+
+Third-party code, data, and model weights remain subject to their respective licenses and attribution requirements. Notices and license copies shipped with this repository are kept under `resources/third_party/`. Model weights are not distributed in this repository; consult each official model page before downloading or using them.

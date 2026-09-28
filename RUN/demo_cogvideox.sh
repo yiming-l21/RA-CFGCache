@@ -32,14 +32,14 @@ mkdir -p "$TMPDIR" "$HF_HOME" "$HUGGINGFACE_HUB_CACHE" "$TRANSFORMERS_CACHE" "$P
 # -----------------------------------------------------------------------------
 BACKEND="cogvideox"
 MODEL_NAME="cogvideox"
-MODEL_PATH="${COGVIDEOX_MODEL_PATH:-/path/CogVideoX-2b}"
+MODEL_PATH="${COGVIDEOX_MODEL_PATH:-}"
 
 MODE="CFGCache" 
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt_video.txt"
 BASE_OUTPUT_DIR="$PROJECT_ROOT/results/cogvideox"
 PROXY_TABLES_PATH="./calibration/cogvideox_rho_cfg6.npz"  # CFGCache 专用离线 rho 代理表
 
-GPU_LIST="1,5,7"
+GPU_LIST="${RA_CFGCACHE_GPUS:-0}"
 NUM_GPUS=""
 PYTHON_PATH=""
 RUN_NAME=""
@@ -77,7 +77,7 @@ show_help() {
 用法: bash RUN/demo_cogvideox.sh [选项] [-- 额外透传给 scripts/sample.sh 的参数]
 
 CogVideoX 专用多卡脚本，只调用 RUN/multi_gpu_launcher.py + scripts/sample.sh。
-backend 已固定为 cogvideox，不再暴露 Flux / Qwen / Chipmunk 等无关分支。
+backend 已固定为 cogvideox。
 
 选项:
   -m, --mode MODE                    缓存模式 [默认: CFGCache]
@@ -87,16 +87,16 @@ backend 已固定为 cogvideox，不再暴露 Flux / Qwen / Chipmunk 等无关�
 
   -p, --prompt_file FILE             Prompt 文件 [默认: resources/prompts/prompt_video.txt]
   -d, --output_dir DIR               基础输出目录 [默认: results/cogvideox]
-      --model_path PATH              CogVideoX 模型路径 [默认: /path/CogVideoX-2b]
+      --model_path PATH              CogVideoX 模型路径（也可设置 COGVIDEOX_MODEL_PATH）
 
   -w, --width WIDTH                  视频宽度 [默认: 720]
   -h, --height HEIGHT                视频高度 [默认: 480]
-      --num_frames N                 视频帧数 [默认: 48]
+      --num_frames N                 视频帧数 [默认: 49]
       --fps N                        输出 FPS [默认: 8]
   -s, --num_steps STEPS              采样步数 [默认: 50]
-  -l, --limit LIMIT                  Prompt 数量限制，0 表示不限制 [默认: 20]
+  -l, --limit LIMIT                  Prompt 数量限制，0 表示不限制 [默认: 100]
 
-      --guidance_scale VALUE         guidance scale [默认: 1.5]
+      --guidance_scale VALUE         guidance scale [默认: 6.0]
       --negative_prompt TEXT         全局负向 prompt [默认: animation]
       --negative_prompt_file FILE    逐行负向 prompt 文件
 
@@ -104,14 +104,14 @@ backend 已固定为 cogvideox，不再暴露 Flux / Qwen / Chipmunk 等无关�
   -o, --max_order N                  Taylor max order [默认: 1]
       --first_enhance N              初始 full steps [默认: 3]
       --hicache_scale VALUE          HiCache scale [默认: 0.5]
-      --rel_l1_thresh VALUE          TeaCache threshold [默认: 0.4]
+      --rel_l1_thresh VALUE          TeaCache threshold [默认: 0.2]
 
       --batch_size N                 batch size [默认: 1]
       --num_videos_per_prompt N      每个 prompt 生成视频数 [默认: 1]
       --seed SEED                    随机种子 [默认: 0]
       --cpu_offload                  启用 CPU offload
 
-      --gpus IDS                     GPU 列表，例如 3 或 4,5,6,7 [默认: 3]
+      --gpus IDS                     GPU 列表，例如 0 或 0,1 [默认: 0]
       --num_gpus N                   不指定 --gpus 时使用 GPU 数量
       --python PATH                  指定 Python 解释器
       --run-name NAME                运行名
@@ -120,8 +120,8 @@ backend 已固定为 cogvideox，不再暴露 Flux / Qwen / Chipmunk 等无关�
       --help                         显示帮助
 
 示例:
-  bash RUN/demo_cogvideox.sh --mode CFGCache --gpus 5,6 --limit 20
-  bash RUN/demo_cogvideox.sh --mode original --gpus 3 --limit 5
+  COGVIDEOX_MODEL_PATH=/path/to/CogVideoX-2b bash RUN/demo_cogvideox.sh --mode CFGCache --gpus 0 --limit 20
+  bash RUN/demo_cogvideox.sh --mode original --gpus 0 --limit 5
 HELP
 }
 
@@ -185,9 +185,14 @@ if [[ -n "$NEGATIVE_PROMPT_FILE" && ! -f "$NEGATIVE_PROMPT_FILE" ]]; then
     exit 1
 fi
 
-if [[ -z "$MODEL_PATH" || ! -d "$MODEL_PATH" ]]; then
+if [[ -z "$MODEL_PATH" ]]; then
+    echo "[ERROR] CogVideoX 模型路径未设置"
+    echo "[ERROR] 请使用 --model_path /path/to/CogVideoX-2b 或设置 COGVIDEOX_MODEL_PATH"
+    exit 1
+fi
+
+if [[ ! -d "$MODEL_PATH" ]]; then
     echo "[ERROR] CogVideoX 模型目录不存在: $MODEL_PATH"
-    echo "[ERROR] 请使用 --model_path /path/CogVideoX-2b 指定"
     exit 1
 fi
 

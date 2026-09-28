@@ -31,14 +31,14 @@ mkdir -p "$TMPDIR" "$HF_HOME" "$HUGGINGFACE_HUB_CACHE" "$TRANSFORMERS_CACHE" "$P
 # -----------------------------------------------------------------------------
 BACKEND="wan"
 MODEL_NAME="wan"
-MODEL_PATH="${WAN_MODEL_PATH:-/path/Wan2.1-T2V-1.3B-Diffusers}"
+MODEL_PATH="${WAN_MODEL_PATH:-}"
 
 MODE="CFGCache"  #original, CFGCache, TeaCache, MagCache, DiCache, Taylor, Taylor-Scaled, HiCache, HiCache-Analytic, ToCa, Delta, collect, ClusCa, Hi-ClusCa, FasterCache, GroupedTaylor
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt_video.txt"
 BASE_OUTPUT_DIR="$PROJECT_ROOT/results/wan"
 PROXY_TABLES_PATH="./calibration/wan_rho_cfg5.npz"
 
-GPU_LIST="1,2,4,6,7"
+GPU_LIST="${RA_CFGCACHE_GPUS:-0}"
 NUM_GPUS=""
 PYTHON_PATH=""
 RUN_NAME=""
@@ -80,13 +80,13 @@ EXTRA_SAMPLE_ARGS=()
 
 show_help() {
     cat <<HELP
-用法: bash RUN/demo_wan.sh [选项] [-- 额外透传给 models.wan.src.sample 的参数]
+用法: bash RUN/demo_wan.sh [选项] [-- 额外透传给 models.wan.sample 的参数]
 
-Wan2.1 专用多卡脚本，只调用 RUN/multi_gpu_launcher.py + models.wan.src.sample。
-backend 已固定为 wan，不再暴露 Flux / Qwen / CogVideoX / Chipmunk 等无关分支。
+Wan2.1 专用多卡脚本，只调用 RUN/multi_gpu_launcher.py + models.wan.sample。
+backend 已固定为 wan。
 
 选项:
-  -m, --mode MODE                    缓存模式 [默认: original]
+  -m, --mode MODE                    缓存模式 [默认: CFGCache]
                                     支持: original, CFGCache, TeaCache, MagCache, DiCache,
                                           Taylor, Taylor-Scaled, HiCache, HiCache-Analytic,
                                           ToCa, Delta, collect, ClusCa, Hi-ClusCa, FasterCache,
@@ -94,8 +94,7 @@ backend 已固定为 wan，不再暴露 Flux / Qwen / CogVideoX / Chipmunk 等�
 
   -p, --prompt_file FILE             Prompt 文件 [默认: resources/prompts/prompt_video.txt]
   -d, --output_dir DIR               基础输出目录 [默认: results/wan]
-      --model_path PATH              Wan2.1 模型路径
-                                    [默认: /path/Wan2.1-T2V-1.3B-Diffusers]
+      --model_path PATH              Wan2.1 模型路径（也可设置 WAN_MODEL_PATH）
       --model_name NAME              模型名称 [默认: wan]
 
   -w, --width WIDTH                  视频宽度 [默认: 832]
@@ -103,7 +102,7 @@ backend 已固定为 wan，不再暴露 Flux / Qwen / CogVideoX / Chipmunk 等�
       --num_frames N                 视频帧数 [默认: 81]
       --fps N                        输出 FPS [默认: 16]
   -s, --num_steps STEPS              采样步数 [默认: 50]
-  -l, --limit LIMIT                  Prompt 数量限制，0 表示不限制 [默认: 10]
+  -l, --limit LIMIT                  Prompt 数量限制，0 表示不限制 [默认: 100]
 
       --guidance_scale VALUE         guidance scale [默认: 5.0]
       --negative_prompt TEXT         全局负向 prompt
@@ -116,7 +115,7 @@ backend 已固定为 wan，不再暴露 Flux / Qwen / CogVideoX / Chipmunk 等�
   -o, --max_order N                  Taylor max order [默认: 1]
       --first_enhance N              初始 full steps [默认: 3]
       --hicache_scale VALUE          HiCache scale [默认: 0.5]
-      --rel_l1_thresh VALUE          TeaCache threshold [默认: 0.2]
+      --rel_l1_thresh VALUE          TeaCache threshold [默认: 0.15]
       --proxy_tables_path FILE       CFGCache 离线 rho/proxy table 路径，如果 sample.py 支持则透传
 
       --batch_size N                 batch size [默认: 1]
@@ -124,7 +123,7 @@ backend 已固定为 wan，不再暴露 Flux / Qwen / CogVideoX / Chipmunk 等�
       --seed SEED                    随机种子 [默认: 0]
       --cpu_offload                  启用 CPU offload
 
-      --gpus IDS                     GPU 列表，例如 1 或 1,5,7 [默认: 1]
+      --gpus IDS                     GPU 列表，例如 0 或 0,1 [默认: 0]
       --num_gpus N                   不指定 --gpus 时使用 GPU 数量
       --python PATH                  指定 Python 解释器
       --run-name NAME                运行名
@@ -133,11 +132,11 @@ backend 已固定为 wan，不再暴露 Flux / Qwen / CogVideoX / Chipmunk 等�
       --help                         显示帮助
 
 示例:
-  bash RUN/demo_wan.sh --mode original --gpus 1 --limit 1
+  WAN_MODEL_PATH=/path/to/Wan2.1-T2V-1.3B-Diffusers bash RUN/demo_wan.sh --mode original --gpus 0 --limit 1
 
   bash RUN/demo_wan.sh \\
     --mode CFGCache \\
-    --gpus 1,5,7 \\
+    --gpus 0,1 \\
     --limit 30 \\
     --model_path /path/Wan2.1-T2V-1.3B-Diffusers
 
@@ -146,7 +145,7 @@ backend 已固定为 wan，不再暴露 Flux / Qwen / CogVideoX / Chipmunk 等�
     --height 720 \\
     --width 1280 \\
     --flow_shift 5.0 \\
-    --gpus 1 \\
+    --gpus 0 \\
     --limit 1
 HELP
 }
@@ -216,9 +215,14 @@ if [[ -n "$NEGATIVE_PROMPT_FILE" && ! -f "$NEGATIVE_PROMPT_FILE" ]]; then
     exit 1
 fi
 
-if [[ -z "$MODEL_PATH" || ! -d "$MODEL_PATH" ]]; then
+if [[ -z "$MODEL_PATH" ]]; then
+    echo "[ERROR] Wan 模型路径未设置"
+    echo "[ERROR] 请使用 --model_path /path/to/Wan2.1-T2V-1.3B-Diffusers 或设置 WAN_MODEL_PATH"
+    exit 1
+fi
+
+if [[ ! -d "$MODEL_PATH" ]]; then
     echo "[ERROR] Wan 模型目录不存在: $MODEL_PATH"
-    echo "[ERROR] 请使用 --model_path /path/to/Wan2.1-T2V-1.3B-Diffusers 指定"
     exit 1
 fi
 

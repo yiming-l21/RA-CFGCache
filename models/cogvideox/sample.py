@@ -461,10 +461,6 @@ def main(opts: SamplingOptions):
         ]
         runtime_ctx = {
             "prompt_indices": batch_prompt_indices,
-            "dump_residual_cfg": {
-                "enable": True,
-                "root": "/path/CFGCache-qwenimage/cfg3.5_cogvideox",
-            },
         }
         pipe_kwargs = _build_pipe_call_kwargs(
             pipe,
@@ -705,7 +701,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--proxy_tables_path",
         type=str,
-        default="/path/CFGCache/calibration/cogvideox_rho_cfg6.npz",
+        default=str(PROJECT_ROOT / "calibration" / "cogvideox_rho_cfg6.npz"),
         help="Path to packed all-cfg offline rho npz for CFGCache.",
     )
     # 默认就保存逐帧评测缓存 + manifest

@@ -677,7 +677,7 @@ def aggregate_outputs(
         dest_dir = aggregated_root / rel_subpath
         dest_dir.mkdir(parents=True, exist_ok=True)
 
-        # Flux / Qwen image-style outputs.
+        # Image-style outputs (currently FLUX).
         for index, src_path in collect_numbered_files(full_output_dir, IMG_PATTERN):
             dest_path = dest_dir / src_path.name
             _copy_file_no_overwrite(src_path, dest_path)
