@@ -589,7 +589,7 @@ def main(opts: SamplingOptions):
         # ------------------------------------------------------------
         # Build and run pipeline.
         # none/rho: 保持原来单次调用逻辑。
-        # gt: 仿照 Qwen sample.py，baseline 跑一次，随后每个 perturb_step 独立重跑。
+        # gt: run the baseline once, then rerun independently for each perturb_step.
         # ------------------------------------------------------------
         if opts.calibrate_mode == "gt":
             baseline_runtime_ctx = build_runtime_ctx(
@@ -967,8 +967,8 @@ if __name__ == "__main__":
                 "--calibrate_mode gt accepts only one of --interval or --perturb_step."
             )
 
-        # 保持 rho 默认路径不变；仅当 gt 没显式传 calibrate_root 时，
-        # 默认切到 calibration_gt/cogvideox，与 Qwen/FLUX GT 目录一致。
+        # Keep the rho default unchanged. For gt, use calibration_gt/cogvideox
+        # when calibrate_root was not set explicitly.
         if str(args.calibrate_root) == str(DEFAULT_CALIBRATE_ROOT):
             args.calibrate_root = str(DEFAULT_GT_CALIBRATE_ROOT)
 

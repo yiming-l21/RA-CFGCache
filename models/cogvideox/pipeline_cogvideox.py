@@ -737,7 +737,7 @@ class CogVideoXPipeline(DiffusionPipeline, CogVideoXLoraLoaderMixin):
         - rho mode saves xt/cond/uncond per step.
         - gt mode saves only guided_ref.pt, guided_old.pt, final_latents.pt.
 
-        `true_cfg_scale` is added for consistency with Qwen/FLUX wrappers. If it is
+        `true_cfg_scale` is shared with the other calibration wrappers. If it is
         provided and > 1, it is used as the CFG composition scale and the cfgX.X
         trace-directory tag. Otherwise, `guidance_scale` is used.
         """

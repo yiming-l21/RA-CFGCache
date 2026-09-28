@@ -10,13 +10,13 @@
     <img src="https://img.shields.io/badge/Paper-arXiv-b31b1b.svg" alt="Paper">
   </a>
   <a href="#license">
-    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License">
+    <img src="https://img.shields.io/badge/License-GPL--3.0-blue.svg" alt="License">
   </a>
-  <a href="#installation">
+  <a href="#quick-start">
     <img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python">
   </a>
-  <a href="#installation">
-    <img src="https://img.shields.io/badge/PyTorch-2.1+-ee4c2c.svg" alt="PyTorch">
+  <a href="#quick-start">
+    <img src="https://img.shields.io/badge/PyTorch-2.6+-ee4c2c.svg" alt="PyTorch">
   </a>
 </p>
 
@@ -37,7 +37,7 @@ RA-CFGCache addresses these two issues with:
 - **Propagation-Aware Rescaling**: rescales the local guided risk using timestep-dependent propagation gain to better reflect final deviation.
 - **Threshold-based Scheduling**: triggers refresh when the accumulated risk exceeds a threshold.
 
-In our paper, RA-CFGCache is evaluated on **FLUX.1-dev**, **Qwen-Image**, and **CogVideoX-2B**, and achieves a stronger efficiency–fidelity trade-off than existing training-free caching baselines.
+In our paper, RA-CFGCache is evaluated on **FLUX.1-dev**, **Wan2.1-T2V-1.3B**, and **CogVideoX-2B**, and achieves a stronger efficiency–fidelity trade-off than existing training-free caching baselines.
 
 ---
 ## Motivation
@@ -71,6 +71,10 @@ RA-CFGCache reformulates cache control under CFG as **guided-risk control**:
 
 ---
 
+## Calibration Branch
+
+For standard inference and reproduction of the main results, use the [`main`](https://github.com/yiming-l21/RA-CFGCache/tree/main) branch. This branch contains the offline calibration pipeline used to estimate the branch-alignment statistics and propagation-aware rescaling curves required by RA-CFGCache.
+
 ## Quick Start
 
 ### 1. Create environment
@@ -80,101 +84,57 @@ cd /path/to/RA-CFGCache
 bash scripts/create_env.sh
 ```
 
-### 2. Run a minimal example
+### 2. Configure model weights
 
-#### FLUX.1-dev
+Model weights are not included in this repository. Download them from their official model pages and review the applicable license before use:
 
-```bash
-bash scripts/demo_flux.sh
-```
+| Model | Official weights | Weight license | Configure with |
+|---|---|---|---|
+| FLUX.1-dev | [black-forest-labs/FLUX.1-dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) | FLUX.1-dev Non-Commercial License | `FLUX_MODEL_DIR` or `--model_dir` |
+| Wan2.1-T2V-1.3B | [Wan-AI/Wan2.1-T2V-1.3B-Diffusers](https://huggingface.co/Wan-AI/Wan2.1-T2V-1.3B-Diffusers) | Apache-2.0 | `WAN_MODEL_PATH` or `--model_path` |
+| CogVideoX-2B | [THUDM/CogVideoX-2b](https://huggingface.co/THUDM/CogVideoX-2b) | Apache-2.0 | `COGVIDEOX_MODEL_PATH` or `--model_path` |
 
-#### Wan2.1-1.3B
-
-```bash
-bash scripts/demo_wan.sh
-```
-
-#### CogVideoX-2B
+For example:
 
 ```bash
-bash scripts/demo_cogvideox.sh
+export FLUX_MODEL_DIR=/path/to/FLUX.1-dev
+export WAN_MODEL_PATH=/path/to/Wan2.1-T2V-1.3B-Diffusers
+export COGVIDEOX_MODEL_PATH=/path/to/CogVideoX-2b
 ```
 
----
+The FLUX directory must use the layout expected by the reference FLUX implementation, including `flux1-dev.safetensors`, `ae.safetensors`, and the text-encoder/tokenizer subdirectories. The Wan and CogVideoX paths should point to local Diffusers-format model directories.
 
-## Supported Models
-
-| Model | Task | Status | Example Script | Notes |
-|---|---|---:|---|---|
-| FLUX.1-dev | Text-to-Image | ✅ | `scripts/demo_flux.sh` | Main T2I backend |
-| Wan2.1-1.3B | Text-to-Video | ✅ | `scripts/demo_wan.sh` | Main T2V backend |
-| CogVideoX-2B | Text-to-Video | ✅ | `scripts/demo_cogvideox.sh` | Main T2V backend |
-
----
-## Reproduce Main Results
-
-The main experimental configurations have already been prepared in the demo scripts under `RUN/`.
-
-To reproduce the main results, switch to the `main` branch and run the corresponding demo script.
+### 3. Run rho calibration
 
 ```bash
-git checkout main
+bash RUN/run_calibration_flux.sh --calibrate_rho --gpus 0 --num_gpus 1
+bash RUN/run_calibration_wan.sh --calibrate_rho --gpus 0 --num_gpus 1
+bash RUN/run_calibration_cogvideox.sh --calibrate_rho --gpus 0 --num_gpus 1
 ```
 
-### FLUX.1-dev
+To collect ground-truth propagation statistics instead, replace `--calibrate_rho` with `--calibrate_gt --interval 3`.
 
-```bash
-bash RUN/demo_flux.sh
-```
+## Supported Calibration Backends
 
-### Wan2.1
+| Model | Task | Calibration launcher |
+|---|---|---|
+| FLUX.1-dev | Text-to-Image | `RUN/run_calibration_flux.sh` |
+| Wan2.1-T2V-1.3B | Text-to-Video | `RUN/run_calibration_wan.sh` |
+| CogVideoX-2B | Text-to-Video | `RUN/run_calibration_cogvideox.sh` |
 
-```bash
-bash RUN/demo_wan.sh
-```
+## Released Rho Tables
 
-### CogVideoX-2B
+Configuration-specific rho tables used by the released experiments are provided under `calibration/`:
 
-```bash
-bash RUN/demo_cogvideox.sh
-```
+- `calibration/flux_rho_all_cfg.npz`
+- `calibration/wan_rho_cfg5.npz`
+- `calibration/cogvideox_rho_cfg6.npz`
 
-The only option that usually needs to be changed is the cache method:
+These statistics contain numerical calibration data only. Because calibration is tied to the model and inference configuration, validate or regenerate the table when changing the scheduler, resolution, number of steps, CFG scale, or prompt distribution.
 
-```bash
-MODE="original"
-```
+## Offline Calibration Workflow
 
-For baseline comparison, set `MODE` to the corresponding method, such as:
-
-```bash
-MODE="original"
-MODE="TeaCache"
-MODE="MagCache"
-MODE="DiCache"
-MODE="Taylor"
-MODE="FasterCache"
-MODE="CFGCache"
-```
-
-The RA-CFGCache results are obtained with:
-
-```bash
-MODE="CFGCache"
-```
-
-Then update the rho table path in the corresponding demo script:
-
-```bash
-RHO_PROXY_TABLES_PATH="./calibration/flux_rho_all_cfg.npz"
-```
-Make sure `RHO_PROXY_TABLES_PATH` points to the `.npz` file generated by the rho calibration stage.
-
-## Recalibration for Custom Settings
-
-This section is only needed if you want to reproduce the calibration process yourself, change the inference configuration, or run RA-CFGCache under a new setting.
-
-The custom calibration pipeline contains two stages:
+The complete workflow contains two stages:
 
 1. offline calibration on the `calibration` branch;
 2. inference on the `main` branch.
@@ -184,13 +144,7 @@ The calibration stage estimates two types of artifacts:
 - `rho`: branch-alignment statistics used by the CFG-aware risk estimator;
 - `gt`: ground-truth propagation statistics used to fit the propagation-aware rescaling curve.
 
-### 1. Offline Calibration
-
-Switch to the calibration branch:
-
-```bash
-git checkout calibration
-```
+### 1. Run Offline Calibration
 
 Before running calibration, make sure the calibration configuration is aligned with the inference configuration on the `main` branch. In particular, check:
 
@@ -228,18 +182,10 @@ Each backend needs two calibration runs: one for `rho` and one for `gt`.
 
 ### 1.1 Calibrate rho
 
-Set the calibration mode in the corresponding calibration script to `rho`.
-
-For example:
+Run the corresponding launcher with `--calibrate_rho`:
 
 ```bash
-CALIBRATE_MODE="rho"
-```
-
-Then run:
-
-```bash
-bash RUN/run_calibration_<backend>.sh
+bash RUN/run_calibration_<backend>.sh --calibrate_rho
 ```
 
 The raw rho calibration results will be saved under:
@@ -258,17 +204,10 @@ This produces the final rho table, usually saved as an `.npz` file.
 
 ### 1.2 Calibrate ground-truth propagation curve
 
-Set the calibration mode to `gt`. For the ground-truth curve, we calibrate every 3 denoising steps:
+For the ground-truth curve, calibrate every 3 denoising steps with:
 
 ```bash
-CALIBRATE_MODE="gt"
-INTERVAL=3
-```
-
-Then run:
-
-```bash
-bash RUN/run_calibration_<backend>.sh
+bash RUN/run_calibration_<backend>.sh --calibrate_gt --interval 3
 ```
 
 The raw GT calibration results will be saved under:
@@ -291,29 +230,15 @@ a, b, alpha
 
 These values should be copied into the RA-CFGCache configuration used during inference.
 
-### 2. Inference with Custom Calibration
+### 2. Use the Calibration Artifacts
 
 After calibration, switch back to the main branch:
 
 ```bash
-git checkout main
+git switch main
 ```
 
-Then configure the corresponding demo script:
-
-```text
-RUN/demo_flux.sh
-RUN/demo_wan.sh
-RUN/demo_cogvideox.sh
-```
-
-Set the cache method to RA-CFGCache:
-
-```bash
-MODE="CFGCache"
-```
-
-Update the rho table path in the demo script so that it points to the `.npz` file produced by rho calibration:
+Follow the inference instructions in the main-branch README and point `RHO_PROXY_TABLES_PATH` to the `.npz` file produced by rho calibration:
 
 ```bash
 RHO_PROXY_TABLES_PATH="/path/to/calibration_rho/<backend>/rho_table.npz"
@@ -329,27 +254,8 @@ prop_alpha = ...
 
 The cache threshold should also be configured in `cache_init.py` according to the desired speed-quality trade-off.
 
-Finally, run the corresponding demo script:
-
-```bash
-bash RUN/demo_flux.sh
-```
-
-or:
-
-```bash
-bash RUN/demo_wan.sh
-```
-
-or:
-
-```bash
-bash RUN/demo_cogvideox.sh
-```
-
 ### Notes
 
-- The released main results can be reproduced directly with `RUN/demo_flux.sh`, `RUN/demo_wan.sh`, and `RUN/demo_cogvideox.sh`.
 - Custom calibration is only required when the model, resolution, scheduler, number of steps, CFG scale, prompt set, or other key settings are changed.
 - The calibration configuration and inference configuration must be aligned. Otherwise, the calibrated rho table and propagation parameters may not match the actual inference setting.
 - `rho` calibration produces the rho table used by RA-CFGCache.
@@ -393,7 +299,7 @@ RA-CFGCache is effective in practice, but several limitations remain:
 
 - The propagation gain is a first-order approximation of downstream error propagation.
 - The scheduler is an online threshold-based controller rather than a globally optimal sequential policy.
-- The framework is most naturally compatible with proxy families that have explicit cumulative reuse semantics.
+- Offline calibration is configuration-specific; transferring to a different model, scheduler, resolution, step count, CFG scale, or prompt distribution may require validation or recalibration.
 
 
 ---
@@ -403,3 +309,13 @@ RA-CFGCache is effective in practice, but several limitations remain:
 This repository is initialized from [HiCache](https://github.com/fenglang918/HiCache). We sincerely thank the HiCache authors for releasing their codebase, which provides an important foundation for this project.
 
 We also thank the authors of prior training-free diffusion acceleration and caching methods, including TeaCache, MagCache, DiCache, FasterCache, and TaylorSeer, for their inspiring works and open-source contributions.
+
+## Citation
+
+The arXiv link and BibTeX entry will be added here when the preprint is available.
+
+## License
+
+RA-CFGCache is released under the [GNU General Public License v3.0](LICENSE).
+
+Third-party code, data, and model weights remain subject to their respective licenses and attribution requirements. Notices and license copies shipped with this repository are kept under `resources/third_party/`. Model weights are not distributed in this repository; consult each official model page before downloading or using them.

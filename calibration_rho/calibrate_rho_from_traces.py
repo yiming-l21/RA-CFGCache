@@ -59,7 +59,7 @@ Adjacent-step rho curve means:
 
 Optional comparison with another rho npz:
 
-    --compare_npz /path/CFGCache/calibration/flux_rho_all_cfg.npz
+    --compare_npz calibration/flux_rho_all_cfg.npz
 
 Example:
 
@@ -73,7 +73,7 @@ Example:
         --root calibration_rho \
         --models flux \
         --cfg_scales auto \
-        --compare_npz /path/CFGCache/calibration/flux_rho_all_cfg.npz
+        --compare_npz calibration/flux_rho_all_cfg.npz
 """
 
 from __future__ import annotations
@@ -874,7 +874,7 @@ def main():
         "--models",
         nargs="+",
         default=["all"],
-        help="Model names under root, e.g. flux qwen. Use 'all' to auto-discover.",
+        help="Model names under root, e.g. flux wan2.1 cogvideox. Use 'all' to auto-discover.",
     )
     parser.add_argument(
         "--cfg_scales",

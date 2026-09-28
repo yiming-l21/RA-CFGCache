@@ -562,7 +562,6 @@ auto_detect_flux_model_dir() {
             "$WEIGHTS_DIR/flux.dev"
             "$WEIGHTS_DIR/flux-dev"
             "$WEIGHTS_DIR/dev"
-            "/mnt/cfs/9n-das-admin/llm_models/flux-dev/"
         )
     else
         candidates+=(

@@ -33,7 +33,6 @@ mkdir -p "$TMPDIR" "$HF_HOME" "$HUGGINGFACE_HUB_CACHE" "$TRANSFORMERS_CACHE" "$P
 # Defaults
 # -----------------------------
 MODEL_PATH="${MODEL_PATH:-}"
-DEFAULT_COGVIDEOX_MODEL_PATH="/path/CogVideoX-2b"
 
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt_video.txt"
 BASE_OUTPUT_DIR="$PROJECT_ROOT/results/cogvideox"
@@ -74,7 +73,7 @@ PERTURB_STEP=""           # GT 曲线指定扰动步
 
 show_help() {
     cat <<'HELP'
-Usage: bash RUN/calibrate_cogvideox.sh [options]
+Usage: bash RUN/run_calibration_cogvideox.sh [options]
 
 Clean CogVideoX multi-GPU launcher.
 Only standard CogVideoX inference and calibration are supported.
@@ -121,7 +120,7 @@ Other:
 
 Examples:
   # rho calibration
-  bash RUN/calibrate_cogvideox.sh \
+  bash RUN/run_calibration_cogvideox.sh \
       --calibrate_rho \
       --prompt_file resources/prompts/prompt_video.txt \
       --guidance_scale 6 \
@@ -129,14 +128,14 @@ Examples:
       --num_gpus 1
 
   # GT calibration by interval
-  bash RUN/calibrate_cogvideox.sh \
+  bash RUN/run_calibration_cogvideox.sh \
       --calibrate_gt \
       --prompt_file resources/prompts/prompt_video.txt \
       --guidance_scale 6 \
       --interval 5
 
   # GT calibration by perturb step
-  bash RUN/calibrate_cogvideox.sh \
+  bash RUN/run_calibration_cogvideox.sh \
       --calibrate_gt \
       --prompt_file resources/prompts/prompt_video.txt \
       --guidance_scale 6 \
@@ -358,7 +357,6 @@ auto_detect_cogvideox_model_path() {
     fi
 
     candidates+=(
-        "$DEFAULT_COGVIDEOX_MODEL_PATH"
         "$WEIGHTS_DIR/CogVideoX-2b"
         "$WEIGHTS_DIR/CogVideoX-2B"
         "$WEIGHTS_DIR/cogvideox-2b"

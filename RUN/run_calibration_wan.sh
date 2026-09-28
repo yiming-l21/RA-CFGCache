@@ -34,7 +34,6 @@ mkdir -p "$TMPDIR" "$HF_HOME" "$HUGGINGFACE_HUB_CACHE" "$TRANSFORMERS_CACHE" "$P
 # Defaults
 # -----------------------------
 MODEL_PATH="${MODEL_PATH:-}"
-DEFAULT_WAN_MODEL_PATH="/path/Wan2.1-T2V-1.3B-Diffusers"
 
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt_video.txt"
 BASE_OUTPUT_DIR="$PROJECT_ROOT/results/wan"
@@ -62,8 +61,8 @@ BATCH_SIZE="1"
 NUM_VIDEOS_PER_PROMPT="1"
 SEED="0"
 
-GPU_LIST="2,3,4,5,7"
-NUM_GPUS="5"
+GPU_LIST="0"
+NUM_GPUS="1"
 
 CPU_OFFLOAD=false
 NO_FAST_LOADER=false
@@ -86,7 +85,7 @@ CALIBRATE_ROOT=""
 
 show_help() {
     cat <<'HELP'
-Usage: bash RUN/calibrate_wan.sh [options]
+Usage: bash RUN/run_calibration_wan.sh [options]
 
 Clean Wan multi-GPU launcher.
 Only standard Wan inference and calibration are supported.
@@ -143,7 +142,7 @@ Other:
 
 Examples:
   # rho calibration
-  bash RUN/calibrate_wan.sh \
+  bash RUN/run_calibration_wan.sh \
       --calibrate_rho \
       --prompt_file resources/prompts/prompt_video.txt \
       --guidance_scale 5.0 \
@@ -151,14 +150,14 @@ Examples:
       --num_gpus 1
 
   # GT calibration by interval
-  bash RUN/calibrate_wan.sh \
+  bash RUN/run_calibration_wan.sh \
       --calibrate_gt \
       --prompt_file resources/prompts/prompt_video.txt \
       --guidance_scale 5.0 \
       --interval 3
 
   # GT calibration by perturb step
-  bash RUN/calibrate_wan.sh \
+  bash RUN/run_calibration_wan.sh \
       --calibrate_gt \
       --prompt_file resources/prompts/prompt_video.txt \
       --guidance_scale 5.0 \
@@ -436,7 +435,6 @@ auto_detect_wan_model_path() {
     fi
 
     candidates+=(
-        "$DEFAULT_WAN_MODEL_PATH"
         "$WEIGHTS_DIR/Wan2.1-T2V-1.3B-Diffusers"
         "$WEIGHTS_DIR/Wan2.1-T2V-1.3B"
         "$WEIGHTS_DIR/Wan2.1"

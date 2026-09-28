@@ -62,7 +62,7 @@ PERTURB_STEP=""         # for GT curve specified perturb step
 PROMPT_FILE="$PROJECT_ROOT/resources/prompts/prompt.txt"
 BASE_OUTPUT_DIR="$PROJECT_ROOT/results/flux"
 
-GPU_LIST="3"
+GPU_LIST="0"
 NUM_GPUS="1"
 
 RUN_NAME=""
@@ -71,10 +71,9 @@ KEEP_TEMP=false
 DRY_RUN=false
 FORCE=false
 
-LEGACY_MODEL_DIR_DEFAULT="/mnt/cfs/9n-das-admin/llm_models/flux-dev/"
 show_help() {
     cat <<'HELP'
-Usage: bash RUN/calibrate_flux.sh [options]
+Usage: bash RUN/run_calibration_flux.sh [options]
 
 Clean FLUX multi-GPU launcher.
 Only standard FLUX inference, optional true CFG, and calibration are supported.
@@ -111,18 +110,18 @@ Calibration options:
 
 Examples:
   # rho curve calibration
-  bash RUN/calibrate_flux.sh \
+  bash RUN/run_calibration_flux.sh \
       --calibrate_rho \
       --prompt_file resources/prompts/prompt.txt
 
   # GT curve calibration by interval
-  bash RUN/calibrate_flux.sh \
+  bash RUN/run_calibration_flux.sh \
       --calibrate_gt \
       --prompt_file resources/prompts/prompt.txt \
       --interval 5
 
   # GT curve calibration by perturb step
-  bash RUN/calibrate_flux.sh \
+  bash RUN/run_calibration_flux.sh \
       --calibrate_gt \
       --prompt_file resources/prompts/prompt.txt \
       --perturb_step 12
@@ -349,7 +348,6 @@ auto_detect_model_dir() {
     fi
 
     if [[ "$model_name" == "flux-dev" ]]; then
-        candidates+=("$LEGACY_MODEL_DIR_DEFAULT")
         candidates+=(
             "$WEIGHTS_DIR/FLUX.1-dev"
             "$WEIGHTS_DIR/flux.dev"
